@@ -1,20 +1,20 @@
 package com.example.vistas.model
 
 import jakarta.persistence.*
-import java.util.*
-
-
 
 @Entity
-@Table(name = "Client")
-class Client {
+@Table(name = "Product")
+
+class Product {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(updatable = false)
     var id: Long? = null
-    var fullname: String? = null
-    var adrress: String? = null
-    var email: String? = null
+    var description: String? = null
+    var price: String? = null
+    var stock: Long? = null
+    var brand: String? = null
+
 
 }

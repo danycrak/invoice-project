@@ -30,12 +30,12 @@ class ClientService {
 
     //clase service
 
-    fun update(cliente: Client): Client {
+    fun update(client: Client): Client {
         try {
-            clientRepository.findById(cliente.id)
+            clientRepository.findById(client.id)
                     ?: throw Exception("ID no existe")
 
-            return clientRepository.save(cliente)
+            return clientRepository.save(client)
         }
         catch (ex:Exception){
             throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)

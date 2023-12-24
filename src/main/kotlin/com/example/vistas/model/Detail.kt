@@ -5,21 +5,18 @@ import java.util.*
 
 
 @Entity
-@Table(name = "invoice")
+@Table(name = "Detail")
 
-class Invoice {
+class Detail {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(updatable = false)
     var id: Long? = null
-    @Column(name = "create_at")
-    var createAt: Date? = null
-    var total: Double? = null
-    @Column(name = "client_id")
-    var clientId: Int? = null
-
-
+    var quantity: Long? = null
+    var price: Double? = null
+    var invoiceId: Long? = null
+    var productId: Long? = null
 
 
 }

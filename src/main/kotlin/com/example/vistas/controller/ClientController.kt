@@ -28,7 +28,9 @@ class ClientController {
     @PutMapping
     fun update (@RequestBody client:Client):ResponseEntity<Client>{
         return ResponseEntity(clientService.update(client), HttpStatus.OK)
+
     }
+
     //clase  controller
     @PatchMapping
     fun updateDescription (@RequestBody client:Client):ResponseEntity<Client>{
