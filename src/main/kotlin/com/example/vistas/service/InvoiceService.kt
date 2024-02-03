@@ -1,89 +1,85 @@
 package com.example.vistas.service
 
-import com.example.vistas.model.Invoice
+import com.example.vistas.model.InvoiceModel
 import com.example.vistas.repository.InvoiceRepository
+import jakarta.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Example
+import org.springframework.data.domain.ExampleMatcher
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import org.springframework.transaction.annotation.Transactional;
+//import javax.validation.ValidationException
 
 
 @Service
 class InvoiceService {
-
     @Autowired
     lateinit var invoiceRepository: InvoiceRepository
 
-    fun list(): List<Invoice> {
-        return invoiceRepository.findAll()
-    }
-    //clase service
-
-    fun save(details: Invoice): Invoice {
-        try {
-            return invoiceRepository.save(details)
-        } catch (ex: Exception) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
-        }
-
+    fun list (pageable: Pageable,invoice: InvoiceModel):Page<InvoiceModel>{
+        val matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withMatcher(("field"), ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+        return invoiceRepository.findAll(Example.of(invoice, matcher), pageable)
     }
 
-    //clase service
-
-    fun update(invoice: Invoice): Invoice {
-        try {
-            invoiceRepository.findById(invoice.id)
-                    ?: throw Exception("ID no existe")
-
-            return invoiceRepository.save(invoice)
-        } catch (ex: Exception) {
-
-
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
-        }
-
-
-
-
-    }
-
-    fun filterTotal(value:Double?): List<Invoice>? {
+    fun filterTotal (value: Double) : List<InvoiceModel>? {
         return invoiceRepository.filterTotal(value)
+
+    }
+    fun filterClient(value:Long?): List<InvoiceModel>? {
+        return invoiceRepository.filterClient(value)
     }
 
-    //clase service
 
-    fun updateDescription (invoice: Invoice): Invoice {
-        try{
-            val response = invoiceRepository.findById(invoice.id)
-                    ?: throw Exception("ID no existe")
-            response.apply {
-              //  precio=invoice.precio
-            }
-            return invoiceRepository.save(response)
-        }
-        catch (ex:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
-        }
-    }
-//Clase Service
-
-    fun listById (id:Long?): Invoice?{
-        return invoiceRepository.findById(id)
+    fun save(invoice: InvoiceModel): InvoiceModel {
+        validateInvoice(invoice)
+        return invoiceRepository.save(invoice)
     }
 
-    //clase service
 
-    fun delete (id: Long?):Boolean?{
-        try{
-            val response = invoiceRepository.findById(id)
-                    ?: throw Exception("ID no existe")
-            invoiceRepository.deleteById(id!!)
-            return true
+    fun update(invoice: InvoiceModel): InvoiceModel {
+        if (invoice.idn == null) {
+            throw ValidationException("ID no proporcionada para actualizar")
         }
-        catch (ex:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
-        }
+        validateInvoice(invoice)
+        return invoiceRepository.save(invoice)
     }
+
+    fun updateDetails(invoice: InvoiceModel): InvoiceModel {
+        if (invoice.idn == null) {
+                throw ValidationException("ID no proporcionada para actualizar detalles")
+        }
+        // Actualizar detalles específicos del invoice si es necesario
+        // Puedes implementar la lógica según tus requisitos
+        // Por ejemplo: invoice.detail = invoiceDetails
+        return invoiceRepository.save(invoice)
+    }
+
+
+    fun listById(idn: Long):    InvoiceModel {
+        return (invoiceRepository.findById(idn)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invoice no encontrado")) as InvoiceModel
+    }
+
+
+    fun delete(idn: Long) {
+        val existingInvoice = invoiceRepository.findById(idn)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invoice no encontrado") }
+
+        invoiceRepository.delete(existingInvoice)
+    }
+
+    private fun validateInvoice(invoice: InvoiceModel) {
+        // Implementa las validaciones necesarias para el Invoice aquí
+        // Por ejemplo: asegurarse de que los campos obligatorios no estén vacíos
+        // if (invoice.codInvoice.isNullOrBlank() || ...)
+    }
+
+
 
 }

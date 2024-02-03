@@ -1,52 +1,52 @@
 package com.example.vistas.controller
 
-import com.example.vistas.model.Product
+
+import com.example.vistas.model.ProductModel
 import com.example.vistas.service.ProductService
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-
-@RestController
+@RestController   //Define una responsabilidad a un componente
 @RequestMapping("/product")   //endpoint
-@CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE])
-
 class ProductController {
-
     @Autowired
     lateinit var productService: ProductService
 
     @GetMapping
-    fun list ():List <Product>{
-        return productService.list()
+    fun list (productModel: ProductModel, pageable: Pageable):ResponseEntity<*>{
+        val response= productService.list(pageable,productModel)
+        return ResponseEntity(response, HttpStatus.OK)
     }
+
+//@RequestParam searchValue:String
 
     @PostMapping
-    fun save (@RequestBody product: Product): ResponseEntity<Product> {
+    fun save(@RequestBody @Valid product: ProductModel): ResponseEntity<ProductModel> {
         return ResponseEntity(productService.save(product), HttpStatus.OK)
     }
-    //clase controller
+
     @PutMapping
-    fun update (@RequestBody product: Product): ResponseEntity<Product> {
+    fun update(@RequestBody product: ProductModel): ResponseEntity<ProductModel> {
         return ResponseEntity(productService.update(product), HttpStatus.OK)
     }
-    //clase  controller
+
     @PatchMapping
-    fun updateDescription (@RequestBody product: Product): ResponseEntity<Product> {
-        return ResponseEntity(productService.updateDescription(product), HttpStatus.OK)
+    fun updateDetails(@RequestBody product: ProductModel): ResponseEntity<ProductModel> {
+        return ResponseEntity(productService.updateDetails(product), HttpStatus.OK)
     }
 
-    @GetMapping("/{id}")
-    fun listById (@PathVariable("id") id: Long): ResponseEntity<*> {
-        return ResponseEntity(productService.listById (id), HttpStatus.OK)
-
+    @GetMapping("/{idp}")
+    fun listById(@PathVariable("idp") idp: Long): ResponseEntity<*> {
+        return ResponseEntity(productService.listById(idp), HttpStatus.OK)
     }
 
-    //clase  controller
-    @DeleteMapping("/delete/{id}")
-    fun delete (@PathVariable("id") id: Long):Boolean?{
-        return productService.delete(id)
+    @DeleteMapping("/delete/{idp}")
+    fun delete(@PathVariable("idp") idp: Long): Boolean? {
+        return productService.delete(idp)
     }
 
 }

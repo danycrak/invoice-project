@@ -1,82 +1,77 @@
 package com.example.vistas.service
 
-import com.example.vistas.model.Product
+import com.example.vistas.model.ProductModel
 import com.example.vistas.repository.ProductRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Example
+import org.springframework.data.domain.ExampleMatcher
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
-
+import org.springframework.transaction.annotation.Transactional;
+//import javax.validation.ValidationException
 
 @Service
 class ProductService {
-
     @Autowired
     lateinit var productRepository: ProductRepository
 
-    fun list(): List<Product> {
-        return productRepository.findAll()
-    }
-    //clase service
-
-    fun save(details: Product): Product {
-        try {
-            return productRepository.save(details)
-        } catch (ex: Exception) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, ex.message)
-        }
-
+    fun list (pageable: Pageable,productModel:ProductModel):Page<ProductModel>{
+        val matcher = ExampleMatcher.matching()
+                .withIgnoreNullValues()
+                .withMatcher(("field"), ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+        return productRepository.findAll(Example.of(productModel, matcher), pageable)
     }
 
-    //clase service
-
-    fun update(product: Product): Product {
-        try {
-            productRepository.findById(product.id)
-                    ?: throw Exception("ID no existe")
-
-            return productRepository.save(product)
-        }
-        catch (ex:Exception){
-
-
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
-        }
+    fun save(product: ProductModel): ProductModel {
+        validateProduct(product)
+        return productRepository.save(product)
     }
 
-    //clase service
+    fun update(product: ProductModel):ProductModel {
+        if (product.idp == null) {
+            //          throw ValidationException("ID no proporcionada para actualizar")
+        }
+        validateProduct(product)
+        return productRepository.save(product)
+    }
 
-    fun updateDescription (product: Product): Product {
+
+    fun updateDetails(product: ProductModel): ProductModel {
+        if (product.idp == null) {
+            //        throw ValidationException("ID no proporcionada para actualizar detalles")
+        }
+        // Actualizar detalles específicos del producto si es necesario
+        // Puedes implementar la lógica según tus requisitos
+        // Por ejemplo: product.stock = newStock
+        return productRepository.save(product)
+    }
+
+    fun listById(idp: Long): ProductModel {
+        return (productRepository.findById(idp)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado")) as ProductModel
+    }
+
+
+    fun delete(idp: Long):Boolean? {
         try{
-            val response = productRepository.findById(product.id)
+            val response = productRepository.findById(idp)
                     ?: throw Exception("ID no existe")
-            response.apply {
-              //  precio=product.precio
-            }
-            return productRepository.save(response)
-        }
-        catch (ex:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
-        }
-    }
-//Clase Service
-
-    fun listById (id:Long?): Product?{
-        return productRepository.findById(id)
-    }
-
-    //clase service
-
-    fun delete (id: Long?):Boolean?{
-        try{
-            val response = productRepository.findById(id)
-                    ?: throw Exception("ID no existe")
-            productRepository.deleteById(id!!)
+            productRepository.deleteById(idp!!)
             return true
         }
         catch (ex:Exception){
+
             throw ResponseStatusException(HttpStatus.NOT_FOUND,ex.message)
         }
+
     }
 
+    private fun validateProduct(product: ProductModel) {
+        // Implementa las validaciones necesarias para el Product aquí
+        // Por ejemplo: asegurarse de que los campos obligatorios no estén vacíos
+        // if (product.desProduct.isNullOrBlank() || ...)
+    }
 }

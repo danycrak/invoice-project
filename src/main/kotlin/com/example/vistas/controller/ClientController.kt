@@ -2,51 +2,49 @@ package com.example.vistas.model
 
 
 /*import jakarta.validation.Valid*/
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-
-
-@RestController
+@RestController   //Define una responsabilidad a un componente
 @RequestMapping("/client")   //endpoint
 class ClientController {
-
     @Autowired
     lateinit var clientService: ClientService
 
     @GetMapping
-    fun list ():List <Client>{
-        return clientService.list()
+    fun list(client: com.example.vistas.model.Client, pageable: Pageable):ResponseEntity<*>  {
+        val response= clientService.list(pageable,client)
+        return ResponseEntity(response, HttpStatus.OK)
+    }
+    @GetMapping("/{idc}")
+    fun listById(@PathVariable("idc") idc: Long): ResponseEntity<*> {
+        return ResponseEntity(clientService.listById(idc), HttpStatus.OK)
     }
 
     @PostMapping
-    fun save (@RequestBody /*@Valid*/ client:Client): ResponseEntity<Client> {
+    fun save(@RequestBody @Valid client: com.example.vistas.model.Client): ResponseEntity<com.example.vistas.model.Client> {
         return ResponseEntity(clientService.save(client), HttpStatus.OK)
     }
-    //clase controller
+
     @PutMapping
-    fun update (@RequestBody client:Client):ResponseEntity<Client>{
+    fun update(@RequestBody client: com.example.vistas.model.Client): ResponseEntity<com.example.vistas.model.Client> {
         return ResponseEntity(clientService.update(client), HttpStatus.OK)
-
     }
 
-    //clase  controller
     @PatchMapping
-    fun updateDescription (@RequestBody client:Client):ResponseEntity<Client>{
-        return ResponseEntity(clientService.updateDescription(client), HttpStatus.OK)
+    fun updateName(@RequestBody client: com.example.vistas.model.Client): ResponseEntity<com.example.vistas.model.Client> {
+        return ResponseEntity(clientService.updateName(client), HttpStatus.OK)
     }
 
-    @GetMapping("/{id}")
-    fun listById (@PathVariable("id") id: Long): ResponseEntity<*>{
-        return ResponseEntity(clientService.listById (id), HttpStatus.OK)
 
+
+
+    @DeleteMapping("/delete/{idc}")
+    fun delete(@PathVariable("idc") idc: Long): Boolean? {
+        clientService.delete(idc)
+        return true
     }
-
-    //clase  controller
-    @DeleteMapping("/delete/{id}")
-    fun delete (@PathVariable("id") id: Long):Boolean?{
-        return clientService.delete(id)
-    }
-
 }

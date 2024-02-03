@@ -4,7 +4,6 @@ package com.example.vistas.config
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
@@ -34,7 +33,7 @@ class SecurityConfig {
                 .authorizeHttpRequests{authRequest->
                     authRequest
                             .requestMatchers("/auth/**").permitAll()
-                            .anyRequest().authenticated()
+                            .anyRequest().denyAll()
                 }
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
 

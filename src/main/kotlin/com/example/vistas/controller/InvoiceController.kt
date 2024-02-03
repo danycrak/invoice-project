@@ -1,57 +1,61 @@
 package com.example.vistas.controller
 
-import com.example.vistas.model.Invoice
+
+import com.example.vistas.model.InvoiceModel
 import com.example.vistas.service.InvoiceService
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-
-@RestController
+@RestController   //Define una responsabilidad a un componente
 @RequestMapping("/invoice")   //endpoint
-
-@CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.DELETE])
 class InvoiceController {
-
     @Autowired
     lateinit var invoiceService: InvoiceService
 
     @GetMapping
-    fun list ():List <Invoice>{
-        return invoiceService.list()
+    fun list (invoice: InvoiceModel, pageable: Pageable):ResponseEntity<*>{
+        val response= invoiceService.list(pageable,invoice)
+        return ResponseEntity(response, HttpStatus.OK)
+    }
+    @GetMapping("/filter-total/{value}")
+    fun listFilterTotal(@PathVariable ("value") value: Double): ResponseEntity<*>{
+        return  ResponseEntity(invoiceService.filterTotal(value), HttpStatus.OK)
+
+    }
+    @GetMapping("/filter-client/{value}")
+    fun listTotals (@PathVariable("value") value: Long ):   ResponseEntity<*>{
+        return ResponseEntity(invoiceService.filterClient(value), HttpStatus.OK)
     }
 
-    @GetMapping("/filter-total/{value}")
-    fun listFilterTotal(@PathVariable("value") value:Double):ResponseEntity<*>{
-        return  ResponseEntity(invoiceService.filterTotal(value),HttpStatus.OK)
-    }
+//@RequestParam searchValue:String
 
     @PostMapping
-    fun save (@RequestBody invoice:Invoice): ResponseEntity<Invoice> {
+    fun save(@RequestBody @Valid invoice: InvoiceModel): ResponseEntity<InvoiceModel> {
         return ResponseEntity(invoiceService.save(invoice), HttpStatus.OK)
     }
-    //clase controller
+
     @PutMapping
-    fun update (@RequestBody invoice: Invoice): ResponseEntity<Invoice> {
+    fun update(@RequestBody invoice: InvoiceModel): ResponseEntity<InvoiceModel> {
         return ResponseEntity(invoiceService.update(invoice), HttpStatus.OK)
     }
-    //clase  controller
+
     @PatchMapping
-    fun updateDescription (@RequestBody invoice: Invoice): ResponseEntity<Invoice> {
-        return ResponseEntity(invoiceService.updateDescription(invoice), HttpStatus.OK)
+    fun updateDetails(@RequestBody invoice: InvoiceModel): ResponseEntity<InvoiceModel> {
+        return ResponseEntity(invoiceService.updateDetails(invoice), HttpStatus.OK)
     }
 
-    @GetMapping("/{id}")
-    fun listById (@PathVariable("id") id: Long): ResponseEntity<*> {
-        return ResponseEntity(invoiceService.listById (id), HttpStatus.OK)
-
+    @GetMapping("/{idn}")
+    fun listById(@PathVariable("idn") idn: Long): ResponseEntity<*> {
+        return ResponseEntity(invoiceService.listById(idn), HttpStatus.OK)
     }
 
-    //clase  controller
-    @DeleteMapping("/delete/{id}")
-    fun delete (@PathVariable("id") id: Long):Boolean?{
-        return invoiceService.delete(id)
+    @DeleteMapping("/delete/{idn}")
+    fun delete(@PathVariable("idn") idn: Long): Boolean? {
+        invoiceService.delete(idn)
+        return true
     }
-
 }
